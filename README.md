@@ -27,3 +27,5 @@ cannot be read — there is no recovery path, so the key is backed up outside th
 scripts/secrets.sh encrypt
 ```
 This regenerates the `.age` files from the current plaintext using the project's `age` public key.
+
+Public mirror of this project; full history lives in the private archive repo.
