@@ -1,0 +1,866 @@
+/* Daily Motivated Report — quiet chrome, loud data.
+   Geist for everything; mono reserved for numerals. One expressive element:
+   the score heat bar (amber → red). */
+
+.page {
+  --bg: #fbfbf9;
+  --surface: #ffffff;
+  --ink: #16150f;
+  --ink-2: #48453d;
+  --muted: #6b675c;
+  --faint: #9a968b;
+  --line: #eae8e1;
+  --line-2: #dad7ce;
+  --accent: #0c6b58;
+  --accent-ink: #08533f;
+  --accent-wash: #ecf4f0;
+  --urgent-wash: #fbeee9;
+  --urgent-ink: #8e2f1c;
+
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  color-scheme: light;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: 'ss01', 'cv11';
+}
+
+.wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 44px clamp(16px, 4vw, 40px) 72px;
+}
+
+/* ---------- Header ---------- */
+.head {
+  max-width: 68ch;
+}
+
+.dateLine {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.title {
+  margin-top: 8px;
+  font-size: clamp(1.35rem, 1rem + 1.2vw, 1.85rem);
+  font-weight: 450;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  color: var(--ink-2);
+  text-wrap: balance;
+}
+
+.count {
+  font-weight: 650;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.summary {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.freshNote {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--faint);
+}
+
+.olderNote {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--faint);
+}
+
+.provExplainer {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--faint);
+}
+
+/* ---------- Segmented controls ---------- */
+.controls {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.seg {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.segLabel {
+  padding: 0 10px 0 9px;
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.segBtn {
+  padding: 6px 11px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.segBtn:hover {
+  color: var(--ink);
+  background: var(--bg);
+}
+
+.segBtn[aria-current='true'] {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.segBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Export CSV — sits at the end of the filter row (pushed right on wide
+   screens via margin-left:auto, wraps to its own row on narrow ones like
+   any other flex child). Pro gets a format dropdown + a real button; free
+   visitors get a look-alike, disabled span with a tooltip instead of a dead
+   link. */
+.exportGroup {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.exportSelect {
+  padding: 7px 8px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.exportSelect:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.exportBtn,
+.exportBtnDisabled {
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.exportBtnDisabled {
+  margin-left: auto;
+}
+
+.exportBtn {
+  border: 1px solid var(--accent);
+  color: var(--accent-ink);
+  background: var(--accent-wash);
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.exportBtn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.exportBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.exportBtnDisabled {
+  border: 1px solid var(--line-2);
+  color: var(--faint);
+  background: var(--surface);
+  cursor: not-allowed;
+}
+
+/* Pending dot for chip navigation — see ChipHint.tsx. Reserves space via a
+   fixed-size inline-block so toggling visibility never shifts the chip. */
+.chipHint {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.chipHintPending {
+  visibility: visible;
+  animation: chipHintFade 200ms ease forwards, chipHintPulse 1s ease-in-out 200ms infinite;
+  animation-delay: 100ms, 100ms;
+}
+
+@keyframes chipHintFade {
+  to { opacity: 0.6; }
+}
+
+@keyframes chipHintPulse {
+  50% { opacity: 0.25; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chipHintPending { animation: none; opacity: 0.6; visibility: visible; }
+}
+
+/* ---------- Table ---------- */
+.tableWrap {
+  margin-top: 28px;
+  overflow-x: auto;
+  border-top: 1px solid var(--line-2);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg);
+  text-align: left;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.table tbody tr:hover td {
+  background: var(--surface);
+}
+
+.thRank { width: 44px; }
+.thScore { width: 116px; }
+
+.rank {
+  padding-left: 4px !important;
+  font-size: 12px;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Row-expand disclosure button, replacing the plain rank numeral. Visually
+   quiet (same faint rank color) until hover/focus, so the table doesn't look
+   cluttered with 50 buttons — the chevron is the only tell that it's
+   interactive. */
+.expandBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.expandBtn:hover {
+  border-color: var(--line-2);
+  background: var(--bg);
+  color: var(--ink-2);
+}
+
+.expandBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.expandChevron {
+  font-size: 9px;
+  color: var(--faint);
+}
+
+.expandBtn:hover .expandChevron,
+.expandBtn[aria-expanded='true'] .expandChevron {
+  color: var(--accent);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Row-expand provenance panel ---------- */
+.expandRow td {
+  padding: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.expandSpacer {
+  border-right: 2px solid var(--accent-wash);
+}
+
+.provenancePanel {
+  padding: 12px 12px 14px;
+  background: var(--accent-wash);
+}
+
+.provenanceEmpty {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.provenanceList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.provenanceItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 12.5px;
+}
+
+.provType {
+  min-width: 108px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.provVerb {
+  color: var(--ink-2);
+}
+
+.provSeen {
+  color: var(--muted);
+}
+
+.provId {
+  margin-left: auto;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  color: var(--ink-2);
+}
+
+.provLink {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.provLink:hover { color: var(--accent-ink); }
+
+.provNoLink {
+  color: var(--faint);
+  white-space: nowrap;
+}
+
+.num { text-align: right; white-space: nowrap; }
+
+.mono {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+}
+
+.subNum {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--faint);
+}
+
+.dim { color: var(--faint); }
+
+/* Score heat bar — number first, bar beside it */
+.scoreCell { padding-top: 12px !important; }
+
+.heat {
+  --w: 50%;
+  --h: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 96px;
+}
+
+.heatNum {
+  flex: none;
+  min-width: 30px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.rowHot .heatNum { color: hsl(var(--h) 70% 34%); }
+
+.heatTrack {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.heatFill {
+  display: block;
+  height: 100%;
+  width: var(--w);
+  border-radius: 3px;
+  background: hsl(var(--h) 76% 48%);
+}
+
+/* Property / owner */
+.property { min-width: 240px; }
+
+.addr {
+  display: block;
+  font-weight: 550;
+  color: var(--ink);
+}
+
+.sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.abs {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.owner { min-width: 180px; color: var(--ink-2); }
+
+.tagEntity {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid var(--line-2);
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--muted);
+  vertical-align: 1px;
+}
+
+/* Signal tags */
+.signals { min-width: 160px; }
+
+.tag {
+  display: inline-block;
+  margin: 0 4px 4px 0;
+  padding: 1px 7px;
+  border-radius: 5px;
+  background: var(--line);
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.tagUrgent {
+  background: var(--urgent-wash);
+  color: var(--urgent-ink);
+  font-weight: 500;
+}
+
+/* ---------- Empty / footer ---------- */
+.empty {
+  margin-top: 40px;
+  padding: 36px 28px;
+  border: 1px dashed var(--line-2);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+  max-width: 56ch;
+}
+
+.empty p + p { margin-top: 6px; }
+
+.empty a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.foot {
+  margin-top: 28px;
+  max-width: 68ch;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--faint);
+}
+
+@media (max-width: 720px) {
+  .wrap { padding-top: 28px; padding-bottom: 88px; }
+  .table { font-size: 13px; }
+  .table td, .table th { padding-left: 8px; padding-right: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segBtn { transition: none; }
+}
+
+/* ---------- Trial welcome (first-visit, dismissible) ----------
+   Same card language as .hotCard below (border + 2px accent top edge, no
+   shadow) so it reads as part of the same system, not a banner bolted on. */
+.welcome {
+  position: relative;
+  margin-top: 24px;
+  padding: 18px 44px 16px 18px;
+  border: 1px solid var(--line-2);
+  border-top: 2px solid var(--accent);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.welcomeDismiss {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: var(--faint);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.welcomeDismiss:hover { background: var(--line); color: var(--ink-2); }
+
+.welcomeLede {
+  max-width: 62ch;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.welcomeHints {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 20px;
+}
+
+.welcomeHints li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+
+.welcomeHintNum {
+  flex: none;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.welcomeFoot {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+
+.welcomeUntil {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.welcomeCta {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 16px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.welcomeCta:hover { background: var(--accent-ink); }
+
+@media (max-width: 720px) {
+  .welcomeHints { grid-template-columns: 1fr; }
+}
+
+/* ---------- Persistent trial pill ----------
+   Always on while a trial cookie is live (not dismissible, unlike .welcome
+   above). Desktop: fixed corner pill. Mobile: full-width sticky footer bar,
+   same breakpoint the rest of the page uses for its layout switch. No drop
+   shadow (the page never uses one) — a solid fill and a hairline border do
+   the lifting instead. */
+.trialPill {
+  position: fixed;
+  z-index: 40;
+  right: 18px;
+  bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 1px solid var(--accent-ink);
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.trialPill:hover { background: var(--accent-ink); }
+
+@media (max-width: 720px) {
+  .trialPill {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    justify-content: center;
+    border-radius: 0;
+    border: none;
+    border-top: 1px solid var(--accent-ink);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    font-size: 13.5px;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* ---------- Hottest stacks strip ----------
+   Pinned above the table, independent of the filter chips. "Pinned" is read
+   through a solid accent top edge (not a shadow — the page uses borders, not
+   drop shadows, everywhere else) and a slightly heavier card border than the
+   table's hairlines, not through a new color or a different radius scale. */
+.hotStrip {
+  margin-top: 28px;
+}
+
+.hotHeading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.hotGrid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.hotCard {
+  position: relative;
+  padding: 16px 16px 14px;
+  border: 1px solid var(--line-2);
+  border-top: 2px solid var(--accent);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.hotCardTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.hotScore {
+  flex: none;
+  min-width: 36px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 18px;
+  font-weight: 650;
+  color: var(--accent-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.hotAddrBlock {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hotAddr {
+  font-weight: 550;
+  color: var(--ink);
+}
+
+.hotCity {
+  margin-top: 1px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.hotTags {
+  margin-top: 10px;
+}
+
+.hotMeta {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+
+.hotMeta dt {
+  font-size: 11px;
+  color: var(--faint);
+}
+
+.hotMeta dd {
+  margin: 1px 0 0;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.hotMailing {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+@media (max-width: 860px) {
+  .hotGrid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Free-visitor gate ---------- */
+.gate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 20px;
+  padding: 20px 16px;
+  border-top: 1px solid var(--line-2);
+  background: var(--surface);
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.gateCopy { max-width: 48ch; }
+
+.gateHeadline { line-height: 1.45; }
+
+.gateSub {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.gate strong { color: var(--ink); font-weight: 600; }
+
+.gateActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.gateBtn {
+  display: inline-block;
+  padding: 9px 16px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.gateBtn:hover { background: var(--accent-ink); }
+
+.gateSecondary {
+  font-size: 12.5px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.gateSecondary:hover { color: var(--accent-ink); }
+
+@media (max-width: 720px) {
+  .gateActions { align-items: flex-start; width: 100%; }
+  .gateBtn { width: 100%; text-align: center; }
+}

@@ -1,0 +1,9 @@
+node_modules/
+.env
+data/
+
+# outreach matches contain homeowner PII (names, mailing addresses) — never commit
+outreach/
+
+# scratch HTML dumps from scripts/probe-sources.mjs (PROBE_DUMP_DIR)
+probe-dumps/

@@ -1,0 +1,1226 @@
+/* ============================================================
+   DOSSIER — Field Case File Dashboard
+   Palette: ink / file-stock / evidence-red / filed-blue / graphite
+   Type: Archivo Narrow (display) + IBM Plex Mono (data/meta)
+   ============================================================ */
+
+/* ---------- CSS custom properties (scoped to page) ---------- */
+.root {
+  --ink:       #0E0E0C;
+  --file:      #E8E3D6;
+  --red:       #C8102E;
+  --blue:      #1F3A5F;
+  --graphite:  #7A7264;
+  --rule:      rgba(14,14,12,0.18);
+  --rule-bold: rgba(14,14,12,0.45);
+
+  min-height: 100vh;
+  background: var(--file);
+  color: var(--ink);
+  font-family: var(--font-ibm-plex-mono), 'Courier New', monospace;
+  /* subtle paper texture via repeating gradient */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 23px,
+      rgba(14,14,12,0.04) 23px,
+      rgba(14,14,12,0.04) 24px
+    );
+}
+
+/* ---------- Header / Masthead ---------- */
+.masthead {
+  background: var(--ink);
+  color: var(--file);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 3px solid var(--red);
+}
+
+.mastheadInner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px 32px 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.mastheadTitleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mastheadTitle {
+  font-family: var(--font-archivo-narrow), 'Arial Narrow', Arial, sans-serif;
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--file);
+  white-space: nowrap;
+}
+
+.mastheadSubtitle {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: rgba(232, 227, 214, 0.5);
+  text-transform: lowercase;
+}
+
+.mastheadMid {
+  flex: 1;
+}
+
+.mastheadSep {
+  display: none;
+}
+
+.classifiedBadge {
+  display: none;
+}
+
+/* ---------- Summary / Stats Bar ---------- */
+.statsBar {
+  background: var(--ink);
+  border-bottom: 1px solid rgba(232,227,214,0.12);
+}
+
+.statsBarInner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 10px 32px 12px;
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.statBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.statValue {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--file);
+  line-height: 1;
+}
+
+.statLabel {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  line-height: 1;
+}
+
+.statDivider {
+  width: 1px;
+  height: 28px;
+  background: rgba(232,227,214,0.15);
+  align-self: center;
+}
+
+.signalRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.signalStat {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.signalCount {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--red);
+}
+
+.signalName {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+/* ---------- Page Body ---------- */
+.body {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 32px 80px;
+}
+
+/* ---------- Section Header ---------- */
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--rule-bold);
+}
+
+.sectionLabel {
+  font-family: var(--font-archivo-narrow), 'Arial Narrow', Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+.sectionCount {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 11px;
+  color: var(--graphite);
+  margin-left: auto;
+}
+
+/* ---------- Lead Grid ---------- */
+.leadGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* ---------- Dossier Card ---------- */
+.card {
+  background: #F2EDE0;
+  border: 1px solid var(--rule-bold);
+  position: relative;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  outline: none;
+  /* slight paper lift */
+  box-shadow: 1px 2px 0 rgba(14,14,12,0.08);
+}
+
+.card:hover {
+  box-shadow: 3px 5px 0 rgba(14,14,12,0.18);
+  transform: translateY(-1px);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* hot lead gets left accent rule */
+.cardHot {
+  border-left: 3px solid var(--red);
+}
+
+.cardHot .cardHeader {
+  background: rgba(200,16,46,0.05);
+}
+
+/* ---------- Card Header ---------- */
+.cardHeader {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+}
+
+.caseInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.caseNumber {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  margin-bottom: 3px;
+}
+
+.caseAddress {
+  font-family: var(--font-archivo-narrow), 'Arial Narrow', Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.caseCity {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 11px;
+  color: var(--graphite);
+  margin-top: 3px;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- Distress Grade Stamp ---------- */
+.stamp {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2.5px solid currentColor;
+  transform: rotate(-14deg);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.stampA {
+  color: var(--red);
+  background: rgba(200,16,46,0.06);
+}
+
+.stampB {
+  color: var(--blue);
+  background: rgba(31,58,95,0.07);
+}
+
+.stampC {
+  color: var(--graphite);
+  background: rgba(122,114,100,0.07);
+}
+
+.stampGrade {
+  font-family: var(--font-archivo-narrow), 'Arial Narrow', Arial, sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.stampLabel {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 6px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+/* ---------- Card Body ---------- */
+.cardBody {
+  padding: 12px 16px 14px;
+}
+
+/* Score meter */
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.scoreNumber {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  min-width: 38px;
+}
+
+.scoreMeter {
+  flex: 1;
+  height: 4px;
+  background: var(--rule);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.scoreFill {
+  height: 100%;
+  background: var(--blue);
+  transition: width 0.6s ease;
+}
+
+.scoreFillHot {
+  background: var(--red);
+}
+
+.scoreCapLabel {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  white-space: nowrap;
+}
+
+/* Evidence tags / signals */
+.evidenceTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.evidenceTag {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  background: var(--blue);
+  color: var(--file);
+  border-radius: 0;
+  white-space: nowrap;
+}
+
+.evidenceTagAlert {
+  background: var(--red);
+}
+
+.evidenceTagGraphite {
+  background: var(--graphite);
+}
+
+/* ---------- Redaction Bar (signature interaction) ---------- */
+.redactedField {
+  margin-bottom: 4px;
+  position: relative;
+}
+
+.redactLabel {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  margin-bottom: 2px;
+  display: block;
+}
+
+.redactWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  min-height: 20px;
+}
+
+.redactContent {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  /* Start revealed = 0%; cover animates away on interaction */
+  width: 100%;
+}
+
+.redactBar {
+  position: absolute;
+  inset: -2px 0;
+  background: var(--ink);
+  /* clip-path starts fully covering: right edge at 100% */
+  clip-path: inset(0 0% 0 0);
+  transition: clip-path 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+/* Wipe-away on parent card hover or focus-within */
+.card:hover .redactBar,
+.card:focus-visible .redactBar,
+.card:focus-within .redactBar {
+  clip-path: inset(0 100% 0 0);
+}
+
+/* Reduced motion: instant reveal instead of wipe */
+@media (prefers-reduced-motion: reduce) {
+  .redactBar {
+    transition: none;
+    opacity: 1;
+  }
+  .card:hover .redactBar,
+  .card:focus-visible .redactBar,
+  .card:focus-within .redactBar {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+/* ---------- Absentee flag ---------- */
+.absenteePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--red);
+  border: 1px solid var(--red);
+  padding: 2px 6px;
+  margin-top: 8px;
+}
+
+/* ---------- Plain Field (paid/default view) ---------- */
+.plainField {
+  margin-bottom: 4px;
+}
+
+.plainLabel {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  margin-bottom: 2px;
+  display: block;
+}
+
+.plainValue {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+}
+
+/* ---------- Lock Overlay (trial mode) ---------- */
+.lockOverlay {
+  position: absolute;
+  inset: -2px 0;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--file);
+  background: rgba(14, 14, 12, 0.82);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Show lock overlay after wipe reveals text on hover */
+.card:hover .lockOverlay,
+.card:focus-visible .lockOverlay,
+.card:focus-within .lockOverlay {
+  opacity: 1;
+}
+
+/* ---------- Date Badge ---------- */
+.dateBadgeWrap {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dateBadge {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--file);
+  background: var(--graphite);
+  padding: 2px 6px;
+}
+
+.dateLabel {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  color: var(--graphite);
+  letter-spacing: 0.06em;
+}
+
+/* ---------- Free-Trial Toggle ---------- */
+.trialToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(232, 227, 214, 0.55);
+  background: none;
+  border: 1px solid rgba(232, 227, 214, 0.2);
+  padding: 3px 9px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.trialToggle:hover {
+  color: rgba(232, 227, 214, 0.85);
+  border-color: rgba(232, 227, 214, 0.45);
+}
+
+.trialToggleOn {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.trialToggleOn:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.trialToggleDot {
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* ---------- Filter Toggles Row ---------- */
+.filterToggles {
+  background: rgba(14, 14, 12, 0.35);
+  border-bottom: 1px solid rgba(232, 227, 214, 0.1);
+}
+
+.filterTogglesInner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 6px 32px;
+  display: flex;
+  gap: 10px;
+}
+
+.filterToggle {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(232, 227, 214, 0.5);
+  background: none;
+  border: 1px solid rgba(232, 227, 214, 0.18);
+  padding: 3px 9px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.filterToggle:hover {
+  color: rgba(232, 227, 214, 0.8);
+  border-color: rgba(232, 227, 214, 0.4);
+}
+
+.filterToggleActive {
+  color: var(--file);
+  border-color: rgba(232, 227, 214, 0.6);
+  background: rgba(232, 227, 214, 0.08);
+}
+
+/* ---------- Card Footer ---------- */
+.cardFooter {
+  border-top: 1px solid var(--rule);
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cardActionsSpace {
+  flex: 1;
+}
+
+.saveBtn {
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--graphite);
+  transition: color 0.15s;
+  line-height: 1;
+}
+
+.saveBtn:hover {
+  color: #c8a000;
+}
+
+.saveBtnActive {
+  color: #c8a000;
+}
+
+.hideBtn {
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 11px;
+  color: var(--graphite);
+  opacity: 0.5;
+  transition: opacity 0.15s, color 0.15s;
+  line-height: 1;
+}
+
+.hideBtn:hover {
+  opacity: 1;
+  color: var(--ink);
+}
+
+.footerAction {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+.footerArrow {
+  font-size: 11px;
+  color: var(--graphite);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.card:hover .footerArrow {
+  transform: translateX(3px);
+  color: var(--blue);
+}
+
+/* ---------- Hidden Card ---------- */
+.hiddenCard {
+  opacity: 0.45;
+  pointer-events: auto;
+}
+
+.hiddenBadge {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--file);
+  background: var(--graphite);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* ---------- Undo Banner ---------- */
+.undoBanner {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--ink);
+  color: var(--file);
+  border: 1px solid rgba(232, 227, 214, 0.25);
+  padding: 10px 16px;
+  box-shadow: 0 4px 16px rgba(14, 14, 12, 0.4);
+}
+
+.undoBannerText {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.undoBannerBtn {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--file);
+  background: none;
+  border: 1px solid rgba(232, 227, 214, 0.4);
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.undoBannerBtn:hover {
+  border-color: var(--file);
+}
+
+.undoBannerDismiss {
+  background: none;
+  border: none;
+  color: var(--graphite);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.undoBannerDismiss:hover {
+  color: var(--file);
+}
+
+/* ---------- Expanded Record Overlay ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(14,14,12,0.7);
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0;
+  animation: overlayIn 0.2s ease;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation: none;
+  }
+  .drawer {
+    animation: none !important;
+  }
+}
+
+.drawer {
+  background: var(--file);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 23px,
+      rgba(14,14,12,0.04) 23px,
+      rgba(14,14,12,0.04) 24px
+    );
+  width: min(560px, 100vw);
+  height: 100vh;
+  overflow-y: auto;
+  border-left: 3px solid var(--ink);
+  animation: drawerIn 0.25s cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+@keyframes drawerIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+.drawerHeader {
+  background: var(--ink);
+  color: var(--file);
+  padding: 20px 28px 18px;
+  border-bottom: 3px solid var(--red);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.drawerClose {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: none;
+  border: 1px solid rgba(232,227,214,0.3);
+  color: var(--file);
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: border-color 0.1s, color 0.1s;
+}
+
+.drawerClose:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.drawerClose:focus-visible {
+  outline: 2px solid var(--file);
+  outline-offset: 2px;
+}
+
+.drawerCaseNum {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  margin-bottom: 4px;
+}
+
+.drawerAddress {
+  font-family: var(--font-archivo-narrow), 'Arial Narrow', Arial, sans-serif;
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+  color: var(--file);
+  margin-bottom: 2px;
+}
+
+.drawerCity {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 12px;
+  color: rgba(232,227,214,0.6);
+  letter-spacing: 0.08em;
+}
+
+.drawerBody {
+  padding: 24px 28px 40px;
+}
+
+/* Drawer stamp: absolute top-right of header */
+.drawerStamp {
+  position: absolute;
+  top: 50%;
+  right: 70px;
+  transform: translateY(-50%) rotate(-10deg);
+}
+
+.drawerStampRing {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid currentColor;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.drawerStampGrade {
+  font-family: var(--font-archivo-narrow), 'Arial Narrow', Arial, sans-serif;
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.drawerStampSub {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 7px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-top: -2px;
+}
+
+/* Drawer sections */
+.drawerSection {
+  margin-bottom: 24px;
+}
+
+.drawerSectionTitle {
+  font-family: var(--font-archivo-narrow), 'Arial Narrow', Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule-bold);
+  margin-bottom: 12px;
+}
+
+.drawerField {
+  margin-bottom: 10px;
+}
+
+.drawerFieldLabel {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  margin-bottom: 2px;
+}
+
+.drawerFieldValue {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+/* Components breakdown */
+.componentGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.componentItem {
+  background: rgba(14,14,12,0.05);
+  border: 1px solid var(--rule);
+  padding: 8px 10px;
+}
+
+.componentKey {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  margin-bottom: 2px;
+}
+
+.componentVal {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.componentValHigh {
+  color: var(--red);
+}
+
+/* ---------- Loading / Error / Empty states ---------- */
+.stateWrap {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.stateCode {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+.stateMessage {
+  font-family: var(--font-archivo-narrow), 'Arial Narrow', Arial, sans-serif;
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.stateSubtext {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 12px;
+  color: var(--graphite);
+}
+
+/* Loading pulse — respects reduced motion */
+.loadingDots {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.loadingDot {
+  width: 5px;
+  height: 5px;
+  background: var(--graphite);
+  border-radius: 50%;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.loadingDot:nth-child(2) { animation-delay: 0.2s; }
+.loadingDot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingDot { animation: none; opacity: 0.6; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .mastheadInner {
+    padding: 12px 16px 10px;
+    gap: 12px;
+  }
+
+  .statsBarInner {
+    padding: 10px 16px;
+    gap: 20px;
+  }
+
+  .signalRow {
+    gap: 10px;
+  }
+
+  .body {
+    padding: 24px 16px 60px;
+  }
+
+  .leadGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .drawer {
+    width: 100vw;
+    border-left: none;
+    border-top: 3px solid var(--ink);
+  }
+
+  .drawerStamp {
+    display: none;
+  }
+
+  .statDivider {
+    display: none;
+  }
+
+  .componentGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .mastheadTitle {
+    font-size: 15px;
+  }
+
+  .caseAddress {
+    font-size: 14px;
+  }
+
+  .stamp {
+    width: 46px;
+    height: 46px;
+  }
+
+  .stampGrade {
+    font-size: 21px;
+  }
+
+  .filterTogglesInner {
+    padding: 6px 16px;
+  }
+}
+
+/* ---------- Signal Timeline ---------- */
+.timelineItem {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.timelineItem:last-child {
+  border-bottom: none;
+}
+
+.timelineDate {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--graphite);
+  white-space: nowrap;
+  min-width: 90px;
+}
+
+.timelineSep {
+  font-size: 10px;
+  color: var(--rule-bold);
+}
+
+.timelineText {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 11px;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+/* ---------- Score Breakdown ---------- */
+.scoreBreakdownTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.scoreBreakdownRow {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.scoreBreakdownRow:last-child {
+  border-bottom: none;
+}
+
+.scoreBreakdownLabel {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 10px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.scoreBreakdownDots {
+  flex: 1;
+  border-bottom: 1px dotted var(--rule-bold);
+  margin-bottom: 3px;
+  min-width: 20px;
+}
+
+.scoreBreakdownPoints {
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blue);
+  white-space: nowrap;
+}
+
+.scoreBreakdownTotal .scoreBreakdownLabel {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.scoreBreakdownTotal .scoreBreakdownPoints {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}

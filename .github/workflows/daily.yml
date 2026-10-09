@@ -1,0 +1,94 @@
+name: Daily Pipeline
+
+on:
+  schedule:
+    # 2026-10-03: the top-of-hour '0 14 * * *' (07:00 Phoenix) schedule never
+    # fired at all on its first morning — no `schedule` event run exists for
+    # it. GitHub documents that schedule triggers can be delayed or dropped
+    # under load, that top-of-the-hour crons are hit hardest, and that newly
+    # created schedules are the most affected. Replaced with two off-peak,
+    # non-top-of-hour crons: a primary and a cheap backstop. The backstop
+    # passes --if-not-ran-today to daily.js (see pipeline/src/skip-if-ran.js)
+    # so it no-ops in seconds if the primary already completed, and only does
+    # a real run if the primary was delayed/dropped/failed before recording a
+    # recorder_nots run today.
+    # 03:47 Phoenix early slot: GitHub delayed the 06:23 slot by ~4h on 2026-10-04 (ran 10:42).
+    # With --if-not-ran-today the later slots exit in seconds when this one succeeded.
+    - cron: '47 10 * * *'
+    - cron: '23 13 * * *' # 06:23 America/Phoenix — primary
+    - cron: '23 15 * * *' # 08:23 America/Phoenix — backstop
+  workflow_dispatch:
+    inputs:
+      fast:
+        description: 'Fast mode (skip slow court walkers: probate/divorce)'
+        type: boolean
+        default: false
+      if_not_ran_today:
+        description: 'Skip if recorder_nots already ran (ok/warn) today, Phoenix time — exercises the backstop logic by hand'
+        type: boolean
+        default: false
+
+concurrency:
+  group: daily-pipeline
+  cancel-in-progress: false
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: pipeline/package-lock.json
+
+      - name: Install dependencies
+        working-directory: pipeline
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        working-directory: pipeline
+        run: npx playwright install --with-deps chromium
+
+      - name: Run daily pipeline
+        working-directory: pipeline
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CRDB_CA_CERT: ${{ secrets.CRDB_CA_CERT }}
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          set -o pipefail
+          FLAGS=""
+          if [ "${{ inputs.fast }}" = "true" ]; then
+            FLAGS="$FLAGS --fast"
+          fi
+          if [ "${{ github.event_name == 'schedule' || inputs.if_not_ran_today == true }}" = "true" ]; then
+            FLAGS="$FLAGS --if-not-ran-today"
+          fi
+          node src/daily.js $FLAGS 2>&1 | tee run.log
+
+      - name: Upload report + outreach artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-pipeline-output-${{ github.run_id }}
+          path: |
+            pipeline/reports/*.md
+            pipeline/outreach/*
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Upload run log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-pipeline-log-${{ github.run_id }}
+          path: pipeline/run.log
+          retention-days: 30
+          if-no-files-found: ignore

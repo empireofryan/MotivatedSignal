@@ -1,0 +1,423 @@
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 40px clamp(16px, 4vw, 40px) 80px;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  color: #16150f;
+}
+
+.eyebrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0c6b58;
+}
+
+.title {
+  margin-top: 6px;
+  font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.section {
+  margin-top: 40px;
+}
+
+.pipelineBanner {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border: 1px solid;
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.pipelineLine {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 13px;
+}
+
+.pipelineLine code {
+  font-family: inherit;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.pipelineMeta {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.pipelineGreen {
+  background: #eef7f3;
+  border-color: #bfe0d2;
+  color: #0c6b58;
+}
+
+.pipelineAmber {
+  background: #fbf3e3;
+  border-color: #e9cf98;
+  color: #8a5a12;
+}
+
+.pipelineRed {
+  background: #fbeeec;
+  border-color: #e3c9c2;
+  color: #9a3b2e;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.meta {
+  margin-top: 4px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  color: #6b675c;
+}
+
+.tableWrap {
+  margin-top: 14px;
+  overflow-x: auto;
+  border: 1px solid #eae8e1;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  text-align: left;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b675c;
+  padding: 10px 12px;
+  border-bottom: 1px solid #dad7ce;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #eae8e1;
+  vertical-align: top;
+  max-width: 320px;
+}
+
+.table tr:last-child td {
+  border-bottom: 0;
+}
+
+.mono {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.segment {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #dad7ce;
+  white-space: nowrap;
+}
+
+.link {
+  color: #0c6b58;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.badgeFlag {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid #c9922e;
+  color: #8a5a00;
+  background: #fbf0d9;
+  white-space: nowrap;
+}
+
+.dim {
+  color: #9a968b;
+}
+
+.denied {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  color: #6b675c;
+}
+
+/* Explicit light page ground — these pages are light-only regardless of OS dark mode */
+.page {
+  min-height: 100vh;
+  background: #fbfbf9;
+  color: #16150f;
+  color-scheme: light;
+}
+
+/* ---- Campaign dashboard additions ---- */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.inlineAction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.select,
+.textInput,
+.numInput {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  color: #16150f;
+  background: #fff;
+  border: 1px solid #dad7ce;
+  border-radius: 8px;
+  padding: 9px 10px;
+  min-height: 40px;
+}
+
+.numInput {
+  width: 72px;
+}
+
+.btn,
+.btnGhost,
+.btnDanger {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn {
+  background: #0c6b58;
+  color: #fff;
+  border-color: #0c6b58;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btnGhost {
+  background: #fff;
+  color: #16150f;
+  border-color: #dad7ce;
+}
+
+.btnGhost:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btnDanger {
+  background: #fff;
+  color: #9a3b2e;
+  border-color: #e3c9c2;
+}
+
+.btnDanger:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.statGrid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.statTile {
+  border: 1px solid #eae8e1;
+  border-radius: 10px;
+  background: #fff;
+  padding: 12px 14px;
+}
+
+.statValue {
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.statLabel {
+  margin-top: 2px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b675c;
+}
+
+.statRate {
+  margin-top: 4px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: #0c6b58;
+}
+
+.noteSmall {
+  margin-top: 10px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: #9a968b;
+  max-width: 68ch;
+}
+
+/* Send sheet: list of expandable rows rather than a table, so it stacks naturally on phone. */
+.sheetList {
+  margin-top: 14px;
+  list-style: none;
+  padding: 0;
+  border: 1px solid #eae8e1;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.sheetRow {
+  border-bottom: 1px solid #eae8e1;
+}
+
+.sheetRow:last-child {
+  border-bottom: 0;
+}
+
+.sheetHead {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 12px 14px;
+  min-height: 40px;
+  cursor: pointer;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  color: #16150f;
+}
+
+.sheetRank {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: #6b675c;
+  min-width: 28px;
+}
+
+.sheetCompany {
+  font-weight: 600;
+  flex: 1 1 160px;
+}
+
+.sheetChevron {
+  margin-left: auto;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 16px;
+  color: #6b675c;
+}
+
+.sheetBody {
+  padding: 0 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.emailField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.emailLabel {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b675c;
+}
+
+.emailText,
+.emailTextSmall {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  background: #fbfbf9;
+  border: 1px solid #eae8e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.emailTextSmall {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  word-break: break-all;
+}
+
+.variantList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.variantList li {
+  color: #6b675c;
+}
+
+.variantActive {
+  color: #16150f !important;
+  font-weight: 600;
+}
+
+.sheetActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}

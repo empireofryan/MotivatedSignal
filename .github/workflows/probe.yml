@@ -1,0 +1,61 @@
+name: Probe Sources
+
+on:
+  workflow_dispatch:
+    inputs:
+      mitigation:
+        description: 'Mitigation mode to test (none, headers, landing-cookie, stealth, pacing, landing-cookie+stealth, landing-cookie+pacing)'
+        type: choice
+        default: 'none'
+        options:
+          - none
+          - headers
+          - landing-cookie
+          - stealth
+          - pacing
+          - landing-cookie+stealth
+          - landing-cookie+pacing
+      phoenix_case:
+        description: 'Phoenix code-enforcement case number to probe'
+        type: string
+        default: 'PEF2026-19777'
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: pipeline/package-lock.json
+
+      - name: Install dependencies
+        working-directory: pipeline
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        working-directory: pipeline
+        run: npx playwright install --with-deps chromium
+
+      - name: Run probe
+        working-directory: pipeline
+        env:
+          PROBE_MITIGATION: ${{ inputs.mitigation }}
+          PROBE_PHOENIX_CASE: ${{ inputs.phoenix_case }}
+          PROBE_DUMP_DIR: ${{ github.workspace }}/pipeline/probe-dumps
+        run: node scripts/probe-sources.mjs
+
+      - name: Upload raw HTML dumps
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: probe-dumps-${{ github.run_id }}
+          path: pipeline/probe-dumps/*
+          retention-days: 7
+          if-no-files-found: ignore

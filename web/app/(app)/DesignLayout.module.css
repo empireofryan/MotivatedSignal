@@ -1,0 +1,19 @@
+.frame {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #0e0e0c;
+}
+
+/* Scroll region below the nav. transform:translateZ(0) makes this the
+   containing block for descendant position:fixed elements (e.g. the Atlas
+   full-screen root), so immersive pages fill THIS area, not the viewport,
+   and never cover the top nav. Normal-flow pages scroll inside here. */
+.scroll {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  transform: translateZ(0);
+}

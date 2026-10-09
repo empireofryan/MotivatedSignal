@@ -1,0 +1,625 @@
+/* ─── Color tokens ─────────────────────────────────────────────────────────── */
+.page {
+  --bone:       #F0EEE9;
+  --ink:        #141414;
+  --ember:      #B5341F;
+  --teal:       #0A6B5B;
+  --muted:      #9B9388;
+  --divider:    rgba(155, 147, 136, 0.30);
+
+  /* Override dark-mode background so the page is always bone */
+  --background: #F0EEE9;
+  background:   #F0EEE9;
+  color:        #141414;
+
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* ─── Layout ───────────────────────────────────────────────────────────────── */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #F0EEE9;
+}
+
+/* ─── Loading / Error ──────────────────────────────────────────────────────── */
+.loadingText {
+  font-family: var(--font-mono, monospace);
+  font-size: 14px;
+  color: #9B9388;
+  letter-spacing: 0.05em;
+}
+
+.errorText {
+  font-family: var(--font-mono, monospace);
+  font-size: 14px;
+  color: #B5341F;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Header ───────────────────────────────────────────────────────────────── */
+.header {
+  margin-bottom: 40px;
+}
+
+.headerTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--font-display, sans-serif);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #141414;
+  margin: 0;
+}
+
+.subtitle {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: #9B9388;
+  letter-spacing: 0.05em;
+  margin: 2px 0 0;
+}
+
+.dateLabel {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: #9B9388;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.headerDivider {
+  height: 1px;
+  background: var(--divider);
+  margin-bottom: 16px;
+}
+
+/* KPI strip */
+.kpiStrip {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.kpiItem {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.kpiNum {
+  font-family: var(--font-display, sans-serif);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  color: #141414;
+}
+
+.kpiNumHot {
+  color: #B5341F;
+}
+
+.kpiNumFresh {
+  color: #0A6B5B;
+}
+
+.kpiLabel {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: #9B9388;
+  letter-spacing: 0.05em;
+}
+
+.kpiDot {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  color: var(--divider);
+  user-select: none;
+}
+
+/* Signal row (breakdown + bar) */
+.sigRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.sigChip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sigChipDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sigChipLabel {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: #9B9388;
+  letter-spacing: 0.03em;
+}
+
+.sigChipCount {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: #141414;
+  font-weight: 500;
+}
+
+/* Signal distribution bar (compact, inline) */
+.sigBar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  gap: 1px;
+  flex: 1;
+  min-width: 80px;
+  max-width: 180px;
+}
+
+.sigSegment {
+  height: 100%;
+  transition: opacity 0.15s;
+}
+
+.sigSegment:hover {
+  opacity: 0.8;
+}
+
+/* ─── Ledger ───────────────────────────────────────────────────────────────── */
+.ledger {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Lead Row ─────────────────────────────────────────────────────────────── */
+.leadRow {
+  border-bottom: 1px solid var(--divider);
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  transition: background 0.1s;
+}
+
+.leadRow:hover {
+  background: rgba(155, 147, 136, 0.06);
+}
+
+.leadRow:focus-visible {
+  outline: 2px solid #0A6B5B;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.leadMain {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 16px 8px;
+}
+
+/* Score column */
+.scoreCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 90px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.scoreNum {
+  font-family: var(--font-display, sans-serif);
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 90px;
+  text-align: right;
+  transition: color 0.1s;
+}
+
+.rowStackBar {
+  width: 100%;
+}
+
+/* Info column */
+.infoCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 6px;
+}
+
+.address {
+  font-family: var(--font-mono, monospace);
+  font-size: 14px;
+  font-weight: 500;
+  color: #141414;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ownerName {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: #9B9388;
+}
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+/* Chevron */
+.chevron {
+  font-size: 20px;
+  color: #9B9388;
+  padding-top: 14px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  line-height: 1;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+/* ─── Badges ───────────────────────────────────────────────────────────────── */
+.badge {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.badgeAbsentee {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 2px;
+  background: rgba(155, 147, 136, 0.15);
+  color: #9B9388;
+}
+
+/* ─── Stack Bar ────────────────────────────────────────────────────────────── */
+.stackBar {
+  display: flex;
+  width: 100%;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  cursor: default;
+  gap: 1px;
+}
+
+.stackSegment {
+  height: 100%;
+  transition: opacity 0.1s;
+}
+
+.stackBar:hover .stackSegment {
+  opacity: 0.85;
+}
+
+/* Tooltip — rendered fixed via inline left/top from client coords */
+.stackTooltip {
+  position: fixed;
+  z-index: 1000;
+  background: #141414;
+  border-radius: 4px;
+  padding: 8px 10px;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.tooltipLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tooltipDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tooltipLine span:nth-child(2) {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: #F0EEE9;
+  flex: 1;
+  white-space: nowrap;
+}
+
+.tooltipPts {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: #9B9388;
+  white-space: nowrap;
+}
+
+/* ─── Expand Panel ─────────────────────────────────────────────────────────── */
+.expandPanel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.expandPanelOpen {
+  max-height: 500px;
+}
+
+.expandInner {
+  padding: 0 8px 20px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.breakdownSection {
+  min-width: 220px;
+  flex: 1;
+}
+
+.sectionHeader {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 500;
+  color: #9B9388;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--divider);
+  margin-bottom: 8px;
+}
+
+.breakdownRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+
+.breakdownLabel {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: #141414;
+}
+
+.breakdownPts {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: #0A6B5B;
+  white-space: nowrap;
+}
+
+.breakdownValue {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: #141414;
+  text-align: right;
+}
+
+.breakdownTotal .breakdownLabel,
+.breakdownTotal .breakdownPts {
+  font-weight: 500;
+  color: #141414;
+}
+
+/* ─── Actions column ───────────────────────────────────────────────────────── */
+.actionsCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding-top: 10px;
+  opacity: 0.3;
+  transition: opacity 0.15s;
+}
+
+.leadRow:hover .actionsCol,
+.leadRow:focus-within .actionsCol {
+  opacity: 1;
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  font-family: var(--font-mono, monospace);
+  font-size: 16px;
+  color: #9B9388;
+  line-height: 1;
+  border-radius: 3px;
+  transition: color 0.1s, background 0.1s;
+}
+
+.actionBtn:hover {
+  color: #141414;
+  background: rgba(155, 147, 136, 0.12);
+}
+
+.actionBtn:focus-visible {
+  outline: 2px solid #0A6B5B;
+  outline-offset: 1px;
+}
+
+.actionBtnActive {
+  color: #E07B2E;
+}
+
+.actionBtnActive:hover {
+  color: #B5341F;
+  background: rgba(181, 52, 31, 0.08);
+}
+
+/* ─── Hidden placeholder row ────────────────────────────────────────────────── */
+.hiddenRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--divider);
+  background: rgba(155, 147, 136, 0.04);
+  gap: 12px;
+}
+
+.hiddenRowText {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: #9B9388;
+  letter-spacing: 0.03em;
+}
+
+.undoBtn {
+  background: none;
+  border: 1px solid var(--divider);
+  border-radius: 3px;
+  padding: 2px 10px;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: #9B9388;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  transition: color 0.1s, border-color 0.1s;
+}
+
+.undoBtn:hover {
+  color: #141414;
+  border-color: #9B9388;
+}
+
+/* ─── Lead row hidden state (in show-hidden mode) ────────────────────────────── */
+.leadRowHidden {
+  opacity: 0.5;
+}
+
+.addressHidden {
+  text-decoration: line-through;
+  color: #9B9388;
+}
+
+/* ─── Header filter toggles ──────────────────────────────────────────────────── */
+.filterRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  background: none;
+  border: 1px solid var(--divider);
+  border-radius: 3px;
+  padding: 4px 12px;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: #9B9388;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+}
+
+.filterBtn:hover {
+  color: #141414;
+  border-color: #9B9388;
+}
+
+.filterBtn:focus-visible {
+  outline: 2px solid #0A6B5B;
+  outline-offset: 2px;
+}
+
+.filterBtnActive {
+  color: #0A6B5B;
+  border-color: #0A6B5B;
+  background: rgba(10, 107, 91, 0.06);
+}
+
+.filterBtnActive:hover {
+  background: rgba(10, 107, 91, 0.12);
+}
+
+/* ─── Mobile ───────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .container {
+    padding: 24px 16px;
+  }
+
+  .headerTop {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .kpiNum {
+    font-size: 20px;
+  }
+
+  .sigBar {
+    max-width: 100%;
+    min-width: 60px;
+  }
+
+  .scoreNum {
+    font-size: 48px;
+  }
+
+  .scoreCol {
+    min-width: 70px;
+  }
+
+  .leadMain {
+    gap: 12px;
+  }
+}

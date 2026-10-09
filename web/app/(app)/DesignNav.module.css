@@ -1,0 +1,70 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 48px;
+  flex: none;
+  padding: 0 16px;
+  background: #0e0e0c;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: ui-monospace, "SFMono-Regular", "IBM Plex Mono", Menlo, monospace;
+  overflow-x: auto;
+  z-index: 10000;
+}
+
+.home {
+  color: rgba(255, 255, 255, 0.92);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex: none;
+}
+.home:hover { color: #fff; }
+
+.divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.18);
+  flex: none;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.link {
+  display: block;
+  color: rgba(255, 255, 255, 0.62);
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 7px 13px;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.link:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+
+.active {
+  color: #0e0e0c;
+  background: #f4f1ea;
+}
+.active:hover { color: #0e0e0c; background: #fff; }
+
+.link:focus-visible,
+.home:focus-visible {
+  outline: 2px solid #7fb7be;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link { transition: none; }
+}

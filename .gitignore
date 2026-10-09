@@ -1,0 +1,31 @@
+node_modules/
+.env
+.env.local
+.env*.local
+data/raw/
+data/*.zip
+data/*.csv
+*.log
+.DS_Store
+.next/
+dist/
+
+# local screenshot / browser-automation artifacts
+.playwright-mcp/
+web/.playwright-mcp/
+/*.png
+.vercel
+
+# private planning docs — plaintext stays local only, .age versions are committed
+# (decrypt/encrypt via scripts/secrets.sh; see README.md "Private files")
+/CLAUDE.md
+/docs/outreach-plan.md
+/docs/competitors.md
+
+# pipeline run output — never committed
+pipeline/reports/
+pipeline/outreach/
+pipeline/probe-dumps/
+
+# prospect/lead-gen contact data (names/emails/phones) — not for public repo
+/outreach/

@@ -1,0 +1,622 @@
+/* ============================================================
+   CONDEMNED — Municipal Notice Board Dashboard
+   ============================================================ */
+
+/* ---- Root / Page ---- */
+.page {
+  min-height: 100vh;
+  background: #0B0B0B;
+  color: #D7D3CB;
+  font-family: var(--font-ibm-mono), 'Courier New', monospace;
+}
+
+/* ---- Header / Notice Board ---- */
+.header {
+  background: #1A1A1A;
+  border-bottom: 4px solid #F4C20D;
+  padding: 2rem 2rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.headerCorner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 60px 60px 0;
+  border-color: transparent #F4C20D transparent transparent;
+}
+
+.headerHazardBand {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(
+    45deg,
+    #F4C20D,
+    #F4C20D 10px,
+    #0B0B0B 10px,
+    #0B0B0B 20px
+  );
+}
+
+.headerTitle {
+  font-family: var(--font-stardos), serif;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #F4C20D;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+  line-height: 1.1;
+}
+
+.headerSubtitle {
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  color: #D7D3CB;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+  opacity: 0.7;
+}
+
+.statBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(215, 211, 203, 0.2);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.statLabel {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #D7D3CB;
+  opacity: 0.5;
+}
+
+.statValue {
+  font-family: var(--font-stardos), serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #F4C20D;
+  line-height: 1;
+}
+
+.statValueHot {
+  color: #E03616;
+}
+
+.cityTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.cityTag {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #0B0B0B;
+  background: #D7D3CB;
+  padding: 0.2rem 0.55rem;
+  font-weight: 500;
+}
+
+/* ---- Main Content ---- */
+.main {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.sectionLabel {
+  font-family: var(--font-stardos), serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #D7D3CB;
+  opacity: 0.5;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(215, 211, 203, 0.15);
+  padding-bottom: 0.5rem;
+}
+
+/* ---- Card Grid ---- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .main {
+    padding: 1rem;
+  }
+}
+
+/* ---- Notice Card ---- */
+.card {
+  background: #1A1A1A;
+  border: 2px solid #D7D3CB;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+  outline: none;
+}
+
+.card:hover,
+.card:focus-visible {
+  border-color: #F4C20D;
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+  .card:hover,
+  .card:focus-visible {
+    transform: none;
+  }
+}
+
+/* Exhibit tab */
+.exhibitTab {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #D7D3CB;
+  color: #0B0B0B;
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  font-weight: 500;
+}
+
+/* Hazard stripe band for HOT leads */
+.hotBand {
+  height: 28px;
+  background: repeating-linear-gradient(
+    45deg,
+    #F4C20D,
+    #F4C20D 10px,
+    #0B0B0B 10px,
+    #0B0B0B 20px
+  );
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  position: relative;
+}
+
+.hotBandText {
+  font-family: var(--font-stardos), serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  color: #0B0B0B;
+  text-transform: uppercase;
+}
+
+.cardBody {
+  padding: 1.25rem;
+  padding-top: 1.5rem; /* room for exhibit tab */
+}
+
+.cardHeader {
+  font-family: var(--font-stardos), serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #D7D3CB;
+  opacity: 0.5;
+  margin-bottom: 0.4rem;
+}
+
+.caseNumber {
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: #D7D3CB;
+  opacity: 0.6;
+  margin-bottom: 0.75rem;
+}
+
+.cardAddress {
+  font-family: var(--font-stardos), serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #D7D3CB;
+  line-height: 1.2;
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+}
+
+.cardCity {
+  font-family: var(--font-stardos), serif;
+  font-size: 0.8rem;
+  color: #D7D3CB;
+  opacity: 0.6;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.postedDate {
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: #D7D3CB;
+  opacity: 0.45;
+  margin-bottom: 0.75rem;
+}
+
+.signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.signalTag {
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.45rem;
+  font-weight: 500;
+}
+
+.signalTagRed {
+  background: rgba(224, 54, 22, 0.2);
+  color: #E03616;
+  border: 1px solid rgba(224, 54, 22, 0.4);
+}
+
+.signalTagAmber {
+  background: rgba(244, 194, 13, 0.15);
+  color: #F4C20D;
+  border: 1px solid rgba(244, 194, 13, 0.35);
+}
+
+.scoreRow {
+  margin-top: 0.75rem;
+}
+
+.scoreLabel {
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #D7D3CB;
+  opacity: 0.5;
+  margin-bottom: 0.3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scoreValue {
+  font-family: var(--font-stardos), serif;
+  font-size: 0.9rem;
+  color: #F4C20D;
+}
+
+.scoreBar {
+  height: 4px;
+  background: rgba(215, 211, 203, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.scoreBarFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: #F4C20D;
+  transition: width 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scoreBarFill {
+    transition: none;
+  }
+}
+
+.scoreBarFillHot {
+  background: #E03616;
+}
+
+/* ---- Loading / Error States ---- */
+.stateContainer {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stateTitle {
+  font-family: var(--font-stardos), serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #D7D3CB;
+}
+
+.stateSubtitle {
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #D7D3CB;
+  opacity: 0.45;
+}
+
+.statePulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .statePulse {
+    animation: none;
+  }
+}
+
+.errorBorder {
+  border: 2px solid #E03616;
+  padding: 1.5rem 2.5rem;
+}
+
+/* ---- Modal Overlay ---- */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 11, 11, 0.92);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.modal {
+  background: #1A1A1A;
+  border: 2px solid #D7D3CB;
+  position: relative;
+  max-width: 680px;
+  width: 100%;
+  overflow: hidden;
+  outline: none;
+}
+
+.modalHazardBand {
+  height: 28px;
+  background: repeating-linear-gradient(
+    45deg,
+    #F4C20D,
+    #F4C20D 10px,
+    #0B0B0B 10px,
+    #0B0B0B 20px
+  );
+}
+
+.modalBody {
+  padding: 2rem 2rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* The big CONDEMNED watermark stamp */
+.stamp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-12deg);
+  font-family: var(--font-stardos), serif;
+  font-size: 4rem;
+  font-weight: 700;
+  color: #E03616;
+  opacity: 0.15;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  pointer-events: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.modalOfficialHeader {
+  font-family: var(--font-stardos), serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #D7D3CB;
+  opacity: 0.5;
+  margin-bottom: 0.5rem;
+}
+
+.modalTitle {
+  font-family: var(--font-stardos), serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #D7D3CB;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.25rem;
+}
+
+.modalCity {
+  font-family: var(--font-stardos), serif;
+  font-size: 0.9rem;
+  color: #D7D3CB;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.5rem;
+}
+
+.modalDivider {
+  border: none;
+  border-top: 1px solid rgba(215, 211, 203, 0.2);
+  margin: 1rem 0;
+}
+
+.modalSection {
+  margin-bottom: 1.25rem;
+}
+
+.modalSectionLabel {
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #D7D3CB;
+  opacity: 0.45;
+  margin-bottom: 0.4rem;
+}
+
+.modalSectionValue {
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.82rem;
+  color: #D7D3CB;
+  line-height: 1.5;
+}
+
+.modalAbsenteeBadge {
+  display: inline-block;
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  font-weight: 500;
+}
+
+.modalAbsenteeBadgeYes {
+  background: rgba(224, 54, 22, 0.2);
+  color: #E03616;
+  border: 1px solid rgba(224, 54, 22, 0.4);
+}
+
+.modalAbsenteeBadgeNo {
+  background: rgba(215, 211, 203, 0.1);
+  color: #D7D3CB;
+  border: 1px solid rgba(215, 211, 203, 0.2);
+}
+
+.componentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.componentRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.75rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(215, 211, 203, 0.08);
+}
+
+.componentKey {
+  color: #D7D3CB;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.65rem;
+  flex-shrink: 0;
+}
+
+.componentVal {
+  color: #F4C20D;
+  text-align: right;
+}
+
+.dismissBtn {
+  display: block;
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: 2px solid #D7D3CB;
+  color: #D7D3CB;
+  font-family: var(--font-stardos), serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dismissBtn:hover,
+.dismissBtn:focus-visible {
+  background: #D7D3CB;
+  color: #0B0B0B;
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dismissBtn {
+    transition: none;
+  }
+}
+
+/* ---- Skeleton loading cards ---- */
+.skeletonCard {
+  background: #1A1A1A;
+  border: 2px solid rgba(215, 211, 203, 0.15);
+  padding: 1.25rem;
+  height: 220px;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonCard {
+    animation: none;
+    opacity: 0.4;
+  }
+}
