@@ -29,3 +29,4 @@ scripts/secrets.sh encrypt
 This regenerates the `.age` files from the current plaintext using the project's `age` public key.
 
 Public mirror of this project; full history lives in the private archive repo.
+Vercel reconnected to the new public repo 2026-10-09T04:37:56Z.
