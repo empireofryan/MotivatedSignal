@@ -14,9 +14,8 @@ on:
     # recorder_nots run today.
     # 03:47 Phoenix early slot: GitHub delayed the 06:23 slot by ~4h on 2026-10-04 (ran 10:42).
     # With --if-not-ran-today the later slots exit in seconds when this one succeeded.
-    - cron: '47 10 * * *'
-    - cron: '23 13 * * *' # 06:23 America/Phoenix — primary
-    - cron: '23 15 * * *' # 08:23 America/Phoenix — backstop
+    - cron: '23 16 * * *' # 09:23 America/Phoenix, backup (skips if Vercel's 08:xx run already ran)
+    - cron: '23 17 * * *' # 10:23 America/Phoenix, second backup
   workflow_dispatch:
     inputs:
       fast:
