@@ -1,5 +1,5 @@
 import { parse } from 'node-html-parser';
-import { fetchCase } from '../courtfetch.js';
+import { fetchCase, advanceWalk } from '../courtfetch.js';
 
 const BASE = 'https://www.superiorcourt.maricopa.gov/docket/FamilyCourtCases/caseInfo.asp?caseNumber=';
 
@@ -75,7 +75,11 @@ export default {
   id: 'court_divorce',
   signalType: 'divorce',
   kind: 'scraper',
-  async fetch({ year = new Date().getFullYear(), starts = SERIES_STARTS, spanMax = 20000, missStop = 50, budget = 2500 } = {}) {
+  // maxBusyStreak: see court_probate.js for why this isn't 1. Shared across
+  // all series in this run (not per-series) — if the backend is in a busy
+  // spell it affects every series identically, so letting each series spin
+  // through its own ~28min tolerance would multiply wait time for no gain.
+  async fetch({ year = new Date().getFullYear(), starts = SERIES_STARTS, spanMax = 20000, missStop = 50, budget = 2500, maxBusyStreak = 8 } = {}) {
     // Resume per series from the last case number seen in a prior run.
     const stateKey = `court_divorce:FC${year}`;
     let seriesState = {};
@@ -90,6 +94,7 @@ export default {
 
     const out = [];
     let busy = false;
+    let busyStreak = 0;
     let requests = 0; // per-run request budget shared across series (court rate-limits per IP)
     for (const start of starts) {
       if (busy || requests >= budget) break;
@@ -100,18 +105,23 @@ export default {
         requests++;
         const caseNumber = `FC${year}-${String(n).padStart(6, '0')}`;
         const { status, text } = await fetchCase(BASE + caseNumber);
+        const walk = advanceWalk(status, { busyStreak, misses }, { maxBusyStreak, missStop });
+        busyStreak = walk.busyStreak;
+        misses = walk.misses;
         if (status === 'busy') {
-          console.warn('[court_divorce] court throttling persists — stopping this run, resume state kept');
-          busy = true;
-          break;
+          console.warn(`[court_divorce] server busy at ${caseNumber} (streak ${busyStreak}/${maxBusyStreak})`);
+          if (walk.stop) {
+            console.warn('[court_divorce] court throttling persists — stopping this run, resume state kept');
+            busy = true;
+            break;
+          }
+          continue; // not a confirmed miss — leave maxFound alone, retry later
         }
         if (status === 'miss') {
-          misses++;
-          if (misses >= missStop) break;
+          if (walk.stop) break;
           continue;
         }
-        misses = 0; // real case page — series is still live
-        maxFound = n;
+        maxFound = n; // real case page — series is still live
         const rec = parseDivorceCase(text, caseNumber);
         if (rec) out.push(rec);
       }

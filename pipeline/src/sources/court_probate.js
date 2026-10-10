@@ -1,5 +1,5 @@
 import { parse } from 'node-html-parser';
-import { fetchCase } from '../courtfetch.js';
+import { fetchCase, advanceWalk } from '../courtfetch.js';
 
 const BASE = 'https://www.superiorcourt.maricopa.gov/docket/ProbateCourtCases/caseInfo.asp?caseNumber=';
 
@@ -85,7 +85,15 @@ export default {
   id: 'court_probate',
   signalType: 'probate',
   kind: 'scraper',
-  async fetch({ year = new Date().getFullYear(), start, max = 12000, missStop = 50, budget = 2000 } = {}) {
+  // maxBusyStreak: consecutive "Server busy" responses to tolerate before
+  // giving up for this run. The court's caseInfo.asp backend goes into
+  // extended (minutes-to-hours) busy spells (confirmed 2026-10-10) that
+  // outlast fetchCase's own per-request backoff (~210s) — stopping on the
+  // FIRST busy (the old behavior) meant a run gave up after ~3.5 minutes and
+  // reported 0 found every time the spell was still active. 8 consecutive
+  // busy signals is ~28 min of tolerance (8 × ~210s) before truly giving up,
+  // bounded well inside daily.js's 8h watchdog / the 350min CI job timeout.
+  async fetch({ year = new Date().getFullYear(), start, max = 12000, missStop = 50, budget = 2000, maxBusyStreak = 8 } = {}) {
     // Resume from the last case number seen in a prior run (per year).
     const stateKey = `court_probate:PB${year}`;
     let saveState = null;
@@ -102,23 +110,29 @@ export default {
     let maxFound = start - 1;
     const out = [];
     let misses = 0;
+    let busyStreak = 0;
     let requests = 0;
     for (let n = start; n <= max && requests < budget; n++) {
       requests++;
       const caseNumber = `PB${year}-${String(n).padStart(6, '0')}`;
       const { status, text } = await fetchCase(BASE + caseNumber);
+      const walk = advanceWalk(status, { busyStreak, misses }, { maxBusyStreak, missStop });
+      busyStreak = walk.busyStreak;
+      misses = walk.misses;
       if (status === 'busy') {
-        console.warn('[court_probate] court throttling persists — stopping this run, resume state kept');
-        break;
+        console.warn(`[court_probate] server busy at ${caseNumber} (streak ${busyStreak}/${maxBusyStreak})`);
+        if (walk.stop) {
+          console.warn('[court_probate] court throttling persists — stopping this run, resume state kept');
+          break;
+        }
+        continue; // not a confirmed miss — leave maxFound alone, retry later
       }
       if (status === 'miss') {
-        misses++;
-        if (misses >= missStop) break;
+        if (walk.stop) break;
         continue;
       }
       const rec = parseProbateCase(text, caseNumber);
       // Real case page either way (non-decedent = guardianship/conservatorship)
-      misses = 0;
       maxFound = n;
       if (rec) out.push(rec);
     }
