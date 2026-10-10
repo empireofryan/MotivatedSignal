@@ -79,7 +79,7 @@ export async function courtsCompleteToday(queryFn, { now = new Date() } = {}) {
   for (const source of COURT_SOURCES) {
     const { rows } = await queryFn(
       `SELECT started_at FROM scrape_runs
-       WHERE source = $1 AND status = 'ok' AND (error IS NULL OR error != 'busy-stop')
+       WHERE source = $1 AND status = 'ok' AND (error IS NULL OR error != 'busy-stop') AND rows_found > 0
          AND started_at >= $2 AND started_at < $3
        ORDER BY started_at DESC LIMIT 1`,
       [source, start, end]
