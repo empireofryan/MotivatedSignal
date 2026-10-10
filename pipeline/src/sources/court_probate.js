@@ -1,7 +1,7 @@
 import { parse } from 'node-html-parser';
 import { fetchCase, advanceWalk } from '../courtfetch.js';
 
-const BASE = 'https://www.superiorcourt.maricopa.gov/docket/ProbateCourtCases/caseInfo.asp?caseNumber=';
+export const BASE = 'https://www.superiorcourt.maricopa.gov/docket/ProbateCourtCases/caseInfo.asp?caseNumber=';
 
 function toIso(str) {
   if (!str) return null;
@@ -112,6 +112,7 @@ export default {
     let misses = 0;
     let busyStreak = 0;
     let requests = 0;
+    let stoppedOnBusy = false;
     for (let n = start; n <= max && requests < budget; n++) {
       requests++;
       const caseNumber = `PB${year}-${String(n).padStart(6, '0')}`;
@@ -123,6 +124,7 @@ export default {
         console.warn(`[court_probate] server busy at ${caseNumber} (streak ${busyStreak}/${maxBusyStreak})`);
         if (walk.stop) {
           console.warn('[court_probate] court throttling persists — stopping this run, resume state kept');
+          stoppedOnBusy = true;
           break;
         }
         continue; // not a confirmed miss — leave maxFound alone, retry later
@@ -137,6 +139,11 @@ export default {
       if (rec) out.push(rec);
     }
     if (saveState && maxFound >= start) await saveState(maxFound);
+    // court-retry.js (and run.js's summary) use this to tell "ran out of
+    // budget/cases normally" apart from "gave up because the court backend
+    // was still busy" — the latter means the run is incomplete and worth
+    // retrying, the former doesn't.
+    out.stoppedOnBusy = stoppedOnBusy;
     return out;
   },
 };

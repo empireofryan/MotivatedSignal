@@ -128,6 +128,10 @@ export default {
       if (maxFound >= resumeAt) seriesState[start] = maxFound;
     }
     if (saveState) await saveState(seriesState);
+    // See court_probate.js for why this matters: `busy` here means the last
+    // series broke out of its inner loop because maxBusyStreak was hit, not
+    // because it ran off the end of real cases — the run is incomplete.
+    out.stoppedOnBusy = busy;
     return out;
   },
 };

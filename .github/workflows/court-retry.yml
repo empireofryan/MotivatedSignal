@@ -1,0 +1,74 @@
+name: Court Retry
+
+# The Maricopa Superior Court docket answers "Server busy" for long
+# stretches, for everyone (confirmed from two networks, incl. GitHub
+# Actions) — not IP throttling, the backend itself is overloaded/down. When
+# that happens during the 08:00/18:00 Phoenix daily pipeline runs, probate +
+# divorce get 0 for the day. This workflow runs a few minutes after each
+# daily trigger and keeps probing every ~4 minutes until the court answers,
+# then walks court_divorce + court_probate at their normal budgets. See
+# pipeline/src/court-retry.js for the loop and pipeline/src/court-lock.js for
+# how this avoids walking the court site at the same time as the daily run's
+# own court lane.
+
+on:
+  schedule:
+    - cron: '17 15 * * *' # 08:17 America/Phoenix, right after the morning daily run
+    - cron: '17 1 * * *'  # 18:17 America/Phoenix, right after the evening catch-up run
+    - cron: '17 19 * * *' # 12:17 America/Phoenix, midday extra attempt
+  workflow_dispatch:
+    inputs:
+      max-minutes:
+        description: 'Give up (report STILL BUSY, exit 0) after this many minutes'
+        type: number
+        default: 300
+
+# A dedicated group, separate from `daily-pipeline` — the daily run should
+# never be blocked waiting on a court-retry run (or vice versa) at the
+# workflow level; they instead coordinate at the DB level via court-lock.js
+# so they just don't walk the court site concurrently. cancel-in-progress:
+# false so a slow retry from an earlier slot isn't killed by the next slot —
+# court-retry.js's own "already complete today" check makes a second
+# concurrent invocation a cheap no-op once the first succeeds anyway.
+concurrency:
+  group: court-retry
+  cancel-in-progress: false
+
+jobs:
+  retry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: pipeline/package-lock.json
+
+      - name: Install dependencies
+        working-directory: pipeline
+        run: npm ci
+
+      - name: Run court retry loop
+        working-directory: pipeline
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CRDB_CA_CERT: ${{ secrets.CRDB_CA_CERT }}
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: |
+          set -o pipefail
+          node src/court-retry.js --max-minutes "${{ inputs.max-minutes || 300 }}" 2>&1 | tee run.log
+
+      - name: Upload run log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: court-retry-log-${{ github.run_id }}
+          path: pipeline/run.log
+          retention-days: 30
+          if-no-files-found: ignore

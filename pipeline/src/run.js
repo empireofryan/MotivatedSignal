@@ -1,6 +1,7 @@
 import { upsertSignals, recordRun } from './upsert.js';
 import { pool } from './db.js';
 import { withRetry } from './retry.js';
+import { withCourtLock } from './court-lock.js';
 import treasurerDelinquent from './sources/treasurer.js';
 import codeMesa from './sources/code_mesa.js';
 import codeGlendale from './sources/code_glendale.js';
@@ -42,10 +43,20 @@ export async function runAdapters(adapters) {
         (m, r) => (r.eventDate && (!m || r.eventDate > m) ? r.eventDate : m),
         null
       );
+      // Court walkers (court_probate/court_divorce) set .stoppedOnBusy on the
+      // returned array when they gave up because the court backend was still
+      // busy, not because they ran off the end of real cases — that's an
+      // incomplete run worth retrying (see court-retry.js), distinct from a
+      // normal status='error'. Recorded as scrape_runs.error='busy-stop'
+      // (status stays 'ok' — it's not a failure, just unfinished) so a
+      // same-day completeness check can tell the two apart without a schema
+      // change.
+      const stoppedOnBusy = records.stoppedOnBusy ?? false;
       const runId = await recordRun({ source: adapter.id, startedAt, finishedAt: new Date(),
-        rowsFound: found, rowsNew: inserted, status: 'ok', sourceMaxDate });
-      summary.push({ source: adapter.id, found, inserted, status: 'ok', runId });
-      console.log(`[${adapter.id}] ${found} found, ${inserted} new`);
+        rowsFound: found, rowsNew: inserted, status: 'ok', sourceMaxDate,
+        error: stoppedOnBusy ? 'busy-stop' : null });
+      summary.push({ source: adapter.id, found, inserted, status: 'ok', runId, stoppedOnBusy });
+      console.log(`[${adapter.id}] ${found} found, ${inserted} new${stoppedOnBusy ? ' (stopped on busy)' : ''}`);
     } catch (e) {
       // recordRun itself can fail (e.g. network drop mid-run) — never let the
       // run logger kill the remaining adapters.
@@ -66,7 +77,7 @@ export async function runAdapters(adapters) {
  * Run adapters in parallel lanes, one lane per remote host, sequential within
  * a lane (per-host throttles stay honest). Wall-clock = slowest lane.
  */
-export async function runAdapterGroups(adapters) {
+export async function runAdapterGroups(adapters, { lockHolder = 'daily' } = {}) {
   const lanes = new Map();
   for (const a of adapters) {
     const lane = a.id.startsWith('recorder') ? 'recorder'
@@ -76,7 +87,16 @@ export async function runAdapterGroups(adapters) {
     lanes.get(lane).push(a);
   }
   console.log(`[run] ${adapters.length} adapters across ${lanes.size} parallel lanes`);
-  const results = await Promise.all([...lanes.values()].map((group) => runAdapters(group)));
+  const results = await Promise.all(
+    [...lanes.entries()].map(([lane, group]) =>
+      // The 'court' lane shares a rate-limited backend with court-retry.js's
+      // standalone retry runs — see court-lock.js — so it's the only lane
+      // that needs cross-process mutual exclusion. `lockHolder` is just a
+      // debugging label; court-retry.js passes 'court-retry' here so
+      // [court-lock] log lines say who's holding it.
+      lane === 'court' ? withCourtLock(lockHolder, () => runAdapters(group)) : runAdapters(group)
+    )
+  );
   return results.flat();
 }
 

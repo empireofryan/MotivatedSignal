@@ -43,6 +43,25 @@ export function advanceWalk(status, { busyStreak, misses }, { maxBusyStreak, mis
   return { busyStreak: 0, misses: 0, stop: false };
 }
 
+/**
+ * Single-shot probe: one request, no internal backoff/retry. fetchCase()
+ * below spends up to ~210s inside its own backoff before it will even
+ * report 'busy' — fine for a real walk, far too slow for court-retry.js's
+ * "is the site back yet?" probe, which wants an answer every few minutes.
+ */
+export async function probeOnce(url) {
+  let res, text;
+  try {
+    res = await globalThis.fetch(url, { headers: { 'User-Agent': UA, Accept: 'text/html' } });
+    text = await res.text();
+  } catch {
+    return { status: 'miss', text: '' };
+  }
+  if (BUSY_RE.test(text) && text.length < 200) return { status: 'busy', text };
+  if (!res.ok || text.length < 500 || !text.includes('Case Number:')) return { status: 'miss', text };
+  return { status: 'ok', text };
+}
+
 export async function fetchCase(url, { throttleMs = 1500 } = {}) {
   for (let attempt = 0; ; attempt++) {
     let res, text;
