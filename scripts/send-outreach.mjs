@@ -150,7 +150,7 @@ function makeTransport() {
     host: 'smtp.zoho.com',
     port: 465,
     secure: true,
-    auth: { user: 'hello@motivatedsignal.com', pass: process.env.ZOHO_SMTP_PASS },
+    auth: { user: process.env.ZOHO_SMTP_USER || 'hello@motivatedsignal.com', pass: process.env.ZOHO_SMTP_PASS },
   });
 }
 
