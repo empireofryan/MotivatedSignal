@@ -1,15 +1,13 @@
 import type { Metadata } from 'next';
 import { turso } from '../../lib/turso';
 import { query } from '../../lib/db';
-import { getDailyReport } from '../../lib/report';
+import { getReportNumbers, renderEmailBody } from '../../lib/outreach-batch';
 import {
   ensureOutreachSchema,
   ensureLinkCodes,
   listCampaigns,
   subjectFor,
   firstName,
-  emailBody,
-  emailBodyWithLeads,
   getLatestMatchDate,
   getMatchesByProspect,
   replySnippet,
@@ -32,33 +30,6 @@ export const dynamic = 'force-dynamic';
 function pct(n: number, denom: number): string {
   if (denom <= 0) return '—';
   return `${Math.round((n / denom) * 1000) / 10}%`;
-}
-
-async function getReportNumbers() {
-  try {
-    const [day, week] = await Promise.all([
-      getDailyReport(24, 5000, undefined, true),
-      // 7-day window with the report page's default 14-day filed filter (its
-      // 7-day chip default) — this is N7 for Email A pass 3, so it must match
-      // what a prospect would see if they clicked through.
-      getDailyReport(24 * 7, 5000, 24 * 14, true),
-    ]);
-    // Homeowner report rows (deduped per parcel), matching the /report page.
-    // Note: pg returns count() as strings, so never sum `counts[].n` without Number().
-    const n24 = day.rows.length;
-    const n7 = week.rows.length;
-    const s7 = week.rows.filter((r) => (r.stacked_types ?? 0) >= 2).length;
-    // NT: this week's trustee-sale rows where the owner has 10+ years in the house — the Email A
-    // lender-opening count (docs/outreach-plan.md). `signal_types` is a comma-joined string.
-    const nt7 = week.rows.filter((r) => {
-      const types = String(r.signal_types ?? '').split(',');
-      return types.includes('trustee_sale') && Number(r.years_owned ?? 0) >= 10;
-    }).length;
-    return { n24, n7, s: s7, nt: nt7, ok: true };
-  } catch (err) {
-    console.error('getReportNumbers failed', err);
-    return { n24: 0, n7: 0, s: 0, nt: 0, ok: false };
-  }
 }
 
 const PHOENIX_TZ = 'America/Phoenix';
@@ -471,18 +442,7 @@ export default async function AdminPage({
     // otherwise fall back to the no-leads body (docs/outreach-plan.md Email A). Both bodies' CTA
     // is the tracked link /r/<code> (web/app/r/[code]/route.ts), never the raw TRIAL_KEY.
     const matches = matchesByProspect.get(id) ?? [];
-    const body =
-      matches.length >= 2
-        ? emailBodyWithLeads({
-            first,
-            n7: reportNumbers.n7,
-            s: reportNumbers.s,
-            nt: reportNumbers.nt,
-            segment,
-            matches: matches.slice(0, 2).map((m) => ({ pitchLine: m.pitchLine, matchTier: m.matchTier })),
-            link,
-          })
-        : emailBody({ first, n7: reportNumbers.n7, s: reportNumbers.s, segment, link });
+    const body = renderEmailBody({ first, segment, link, matches, reportNumbers });
 
     const email = (p.email as string | null) ?? null;
     const url = (p.url as string | null) ?? null;

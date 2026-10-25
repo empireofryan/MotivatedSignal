@@ -1,0 +1,51 @@
+name: Send Outreach
+
+on:
+  schedule:
+    - cron: '45 16 * * 1-5' # 09:45 America/Phoenix, Mon-Fri
+  workflow_dispatch:
+    inputs:
+      n:
+        description: 'Emails to send (blank = server ramp: 10/day for the first 5 send days, then 15; hard cap 20)'
+        type: string
+        default: ''
+      dry_run:
+        description: 'Dry run (select prospects, send nothing, write no events)'
+        type: boolean
+        default: true
+      test_to:
+        description: 'Send ONE [TEST] copy of the first email to this address instead (nothing marked)'
+        type: string
+        default: ''
+
+concurrency:
+  group: send-outreach
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: scripts/package-lock.json
+
+      - name: Install dependencies
+        working-directory: scripts
+        run: npm ci --no-audit --no-fund
+
+      - name: Send
+        working-directory: scripts
+        env:
+          ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
+          ZOHO_SMTP_PASS: ${{ secrets.ZOHO_SMTP_PASS }}
+          SEND_N: ${{ github.event_name == 'workflow_dispatch' && inputs.n || '' }}
+          # Scheduled runs are always real; manual runs follow the input (default true).
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+          TEST_TO: ${{ github.event_name == 'workflow_dispatch' && inputs.test_to || '' }}
+        run: node send-outreach.mjs
