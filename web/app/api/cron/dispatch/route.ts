@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 
 const REPO = 'empireofryan/MotivatedSignal';
 const WORKFLOW = 'daily.yml';
+const OUTREACH_WORKFLOW = 'send-outreach.yml';
 
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
@@ -15,13 +16,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
   // ?mode=catchup (evening run) always runs; the morning run skips if today's already ran.
-  const catchup = request.nextUrl.searchParams.get('mode') === 'catchup';
+  // ?mode=outreach fires the cold-email sender (it no-ops if today's batch already went out).
+  const mode = request.nextUrl.searchParams.get('mode');
+  const catchup = mode === 'catchup';
+  const outreach = mode === 'outreach';
+  const workflow = outreach ? OUTREACH_WORKFLOW : WORKFLOW;
+  const inputs = outreach ? { dry_run: false } : { fast: false, if_not_ran_today: !catchup };
   const token = process.env.GH_DISPATCH_TOKEN;
   if (!token) {
     return NextResponse.json({ ok: false, error: 'GH_DISPATCH_TOKEN not set' }, { status: 500 });
   }
   const res = await fetch(
-    `https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW}/dispatches`,
+    `https://api.github.com/repos/${REPO}/actions/workflows/${workflow}/dispatches`,
     {
       method: 'POST',
       headers: {
@@ -30,7 +36,7 @@ export async function GET(request: NextRequest) {
         'X-GitHub-Api-Version': '2022-11-28',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ ref: 'main', inputs: { fast: false, if_not_ran_today: !catchup } }),
+      body: JSON.stringify({ ref: 'main', inputs }),
       cache: 'no-store',
     },
   );
@@ -39,5 +45,5 @@ export async function GET(request: NextRequest) {
     console.error('[cron/dispatch] GitHub dispatch failed', res.status, text.slice(0, 300));
     return NextResponse.json({ ok: false, status: res.status }, { status: 502 });
   }
-  return NextResponse.json({ ok: true, dispatched: WORKFLOW, catchup, at: new Date().toISOString() });
+  return NextResponse.json({ ok: true, dispatched: workflow, catchup, at: new Date().toISOString() });
 }
