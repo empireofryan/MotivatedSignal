@@ -16,6 +16,8 @@ import ChipHint from './ChipHint';
 import ExportControls from './ExportControls';
 import TableRow from './TableRow';
 import TrialWelcome from './TrialWelcome';
+import TrialActivator from './TrialActivator';
+import { verifyProspectId } from '../../../lib/outreach';
 import TrialPill from './TrialPill';
 import {
   SIGNAL_LABELS,
@@ -87,6 +89,10 @@ export default async function DailyReportPage({
     trialCookie: cookieStore.get('ms_trial')?.value,
   });
   const isPro = access.isPro;
+  // Emailed prospect (signed ms_pid from /r/<code>) with no trial yet: TrialActivator starts it on
+  // first real input. Never for a visitor whose trial already ran out.
+  const pendingTrial =
+    !isPro && !access.trialEnded && verifyProspectId(cookieStore.get('ms_pid')?.value ?? null) != null;
   const isTrial = access.isTrialActive;
   const trialUntil = isTrial ? access.trialUntil ?? undefined : undefined;
   const welcomeDismissed = cookieStore.get('ms_welcome_dismissed')?.value === '1';
@@ -224,6 +230,8 @@ export default async function DailyReportPage({
             </span>
           )}
         </nav>
+
+        {pendingTrial ? <TrialActivator /> : null}
 
         {isTrial && !welcomeDismissed ? (
           <TrialWelcome

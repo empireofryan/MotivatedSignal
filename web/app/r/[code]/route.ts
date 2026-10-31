@@ -6,35 +6,20 @@ import {
   logEvent,
   signProspectId,
 } from '../../../lib/outreach';
-import { randomVid, startOrReuseTrial, setTrialCookies } from '../../../lib/access';
+import { randomVid } from '../../../lib/access';
+import { isBotUserAgent } from '../../../lib/bot';
 
-// Tracked touch-1 link: /r/<code> resolves the 8-char code to a prospect, logs a `clicked`
-// outreach_event (with a bot flag — see isBotClick below), then grants a trial exactly like
-// /api/trial?p=<id>&k=<TRIAL_KEY> used to — MINUS ever putting TRIAL_KEY in an email, MINUS ever
-// extending the trial on repeat clicks, and MINUS granting anything at all to a bot click. Also
-// stamps visitor-identity cookies (`ms_pid` signed, `ms_vid` anonymous) so /api/track can
+// Tracked touch-1 link: /r/<code> resolves the 8-char code to a prospect and logs a `clicked`
+// outreach_event (with a bot flag). It does NOT start the trial: mail-gateway sandboxes (Defender
+// Safe Links and friends) open every link with a normal Chrome UA within a minute of delivery and
+// burned each prospect's one-and-only trial (2026-10-26..29). The trial now starts from
+// /api/trial/activate, which TrialActivator on /report calls only after real pointer/touch/key
+// input. Also stamps visitor-identity cookies (`ms_pid` signed, `ms_vid` anonymous) so /api/track can
 // attribute later /report activity back to this prospect. Unknown codes fall through to
 // /pricing without logging anything.
 export const dynamic = 'force-dynamic';
 
 const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
-
-// Known link-scanner / security-gateway user agents that prefetch links from inside an email
-// before a human ever opens it. These should never count as a real click, and must never start
-// a trial (a prospect's one-and-only trial would otherwise get burned by their own mail gateway).
-const BOT_UA_PATTERNS: RegExp[] = [
-  /barracuda/i,
-  /proofpoint/i,
-  /mimecast/i,
-  /microsoft.?defender/i,
-  /safelinks/i, // Microsoft Defender for Office 365 "Safe Links" prefetcher
-  /googleimageproxy/i, // Gmail's image-proxy UA also prefetches plain links in some configs
-];
-
-function isBotUserAgent(ua: string | null): boolean {
-  if (!ua || ua.trim() === '') return true;
-  return BOT_UA_PATTERNS.some((re) => re.test(ua));
-}
 
 /** True if the most recent 'sent' event for this prospect happened within the last 5 seconds —
  * i.e. this "click" fired before a human could plausibly have opened the email. */
@@ -88,40 +73,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ cod
 
   const res = NextResponse.redirect(new URL('/report', request.url));
 
-  if (bot) {
-    console.warn('[r/code] bot-flagged click — not starting a trial', { code, userAgent });
-  } else {
-    // One trial per prospect, ever: startOrReuseTrial returns the existing row unchanged if this
-    // prospect already clicked before (even if it has since expired), and only creates a new
-    // 7-day trial the first time. The cookie always reflects whatever row comes back, so a
-    // post-expiry click still carries the real ends_at for the report page's "trial ended" copy.
-    try {
-      await db.execute(`
-        CREATE TABLE IF NOT EXISTS trial_clicks (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          prospect_id INTEGER,
-          user_agent TEXT,
-          created_at TEXT DEFAULT (datetime('now'))
-        )
-      `);
-      await db.execute({
-        sql: 'INSERT INTO trial_clicks (prospect_id, user_agent) VALUES (?, ?)',
-        args: [prospect.id, userAgent],
-      });
-      await db.execute({
-        sql: "UPDATE prospects SET status = 'trial' WHERE id = ? AND status = 'new'",
-        args: [prospect.id],
-      });
-      const campaign = await getLatestCampaign(db);
-      await logEvent(db, { prospectId: prospect.id, campaignId: campaign.id, variant: prospect.variant, event: 'trial' });
-
-      const trial = await startOrReuseTrial(db, { prospectId: prospect.id, source: 'r_code' });
-      setTrialCookies(res, trial);
-    } catch (err) {
-      // Never block the redirect on logging/trial failures.
-      console.error('trial grant failed', err);
-    }
-  }
+  if (bot) console.warn('[r/code] bot-flagged click', { code, userAgent });
 
   // Visitor identity: ms_pid ties future /api/track activity back to this prospect; ms_vid covers
   // anonymous traffic too (set here since this is also this visitor's first-ever page hit).
